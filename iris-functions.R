@@ -17,16 +17,31 @@ update.plot <- function(dat, centroid, clust){
 }
 
 
-plot.single <- function(dat, centroid, clust = NULL){
-    k <- dim(centroid)[1]
+plot.iris <- function(dat, centroid = NULL, clust = NULL){
+    # functions in one of two ways:
+    #  1. plot.iris(dat) plots data colored by species
+    #  2. plot.iris(dat, centroid, cluster) plots data with centroids
+    #       colored by assigned cluster
     m <- dim(dat)[1]
-    centroid$class <- "centroid"
-    dm <- rbind(centroid, dat)
-    clust <- c(1:k, clust)
-    size <- c(rep(2,k), rep(1,m))
-    plot(dm$petal.length, dm$petal.width, col = clust, pch = 16, cex = size,
+    if(!is.null(centroid)){
+        k <- dim(centroid)[1]
+        centroid$class <- factor(1:3)
+        dm <- rbind(centroid, dat)
+        size <- c(rep(2,k), rep(1,m))
+    } else {
+        size <- 1
+        dm <- dat
+    }
+    if(!is.null(clust)){
+        clust <- c(1:k, clust)
+        class <- factor(paste0("Cluster #",clust))
+    } else {
+        class <- dm$class
+    }
+    
+    plot(dm$petal.length, dm$petal.width, col = class, pch = 16, cex = size,
          xlab = "Petal Length", ylab = "Petal Width")
-    legend("bottomright", levels(dat$class), pch = 16, col = palette()[1:3])
+    legend("bottomright", levels(class), pch = 16, col = palette()[1:3])
 }
 
 # assign each observation to a cluster based on distance to centroid

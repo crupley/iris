@@ -42,8 +42,13 @@ legend("bottom", levels(dat$class), pch = 16, col = palette()[1:3],
 
 Looking at the data this way can help show us why this dataset has been has been of interest for clustering data. In each of the plots above, the species of iris group together nicely in their measurements with the possible exception of the sepal length / width of the XXX and XXX species. For simplicity from here forward, I will only look at one of the above plots, petal length vs petal width, though I will continue to use all 4 variables for the analysis.
 
+
+```{r general functions, echo=FALSE}
+source("iris-functions.R")
+```
+
 ```{r petal plot, echo=FALSE}
-plot.single(dat, centroid, clust)
+plot.iris(dat)
 ```
 
 # Clustering
@@ -59,11 +64,8 @@ sam <- sample(1:m, k)
 centroid <- dat[sam,-5]
 ```
 
-```{r general functions}
-source("iris-functions.R")
 
-
-
+```{r}
 clust <- cluster(dat, centroid)
 
 print(data.frame(Iteration = 1, 
