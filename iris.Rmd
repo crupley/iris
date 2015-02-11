@@ -8,10 +8,10 @@ output: html_document
 # Introduction
 
 
-
+# Data Exploration
 
 ```{r setup, echo=FALSE}
-dat <- read.csv("iris.data", header = FALSE)
+dat <- read.csv("./data/iris.data", header = FALSE)
 names(dat) <- c("sepal.length",
                 "sepal.width",
                 "petal.length",
@@ -19,16 +19,16 @@ names(dat) <- c("sepal.length",
                 "class")
 
 library(RColorBrewer)
-palette(brewer.pal(6, "Paired"))
+palette(brewer.pal(6, "Set2"))
 ```
 
-First, let's take a look at the structure of the data. The set contains 150 observations of measurements on 4 different aspects of iris flowers and they are classified as one of 3 different species of iris. There are 50 observations of each species. An example observation from the dataset is shown below.
+First, let's take a look at the structure of the data. The set contains 150 observations of measurements on 4 different aspects of iris flowers and they are classified as one of 3 different species of iris. There are 50 observations of each species. An example observation of each species from the dataset is shown below.
 
 ```{r example, echo=FALSE}
 print(dat[c(1, 51, 101),])
 ```
 
-In order to visualize the data, we can
+In order to visualize the data, we can plot the four variables against each other pairwise in a XXX plot.
 
 ```{r, initial plot, echo=FALSE}
 plot(dat[,-5], col = dat$class, pch = 16, cex = 0.5)
@@ -40,89 +40,46 @@ legend("bottom", levels(dat$class), pch = 16, col = palette()[1:3],
        horiz = TRUE)
 ```
 
-```{r}
+Looking at the data this way can help show us why this dataset has been has been of interest for clustering data. In each of the plots above, the species of iris group together nicely in their measurements with the possible exception of the sepal length / width of the XXX and XXX species. For simplicity from here forward, I will only look at one of the above plots, petal length vs petal width, though I will continue to use all 4 variables for the analysis.
+
+```{r petal plot, echo=FALSE}
+plot.single(dat, centroid, clust)
+```
+
+# Clustering
+
+```{r initialize}
 # initialize parameters
-k <- 3
-m <- dim(dat)[1]
-# dmat <- data.frame(matrix(rep(0, k*m),m,k)) #distance matrix
+k <- 3  # number of clusters
+m <- dim(dat)[1]  # number of examples
 
 # initialize centroids to k random data points from set
 # set.seed(3)
 sam <- sample(1:m, k)
 centroid <- dat[sam,-5]
+```
 
-# distance between two data points
-dist <- function(x1, x2) (sum(x1 - x2))^2
-
-# center of mass
-cm <- function(dat) apply(dat[,-5], 2, mean)
-
-# plot centroids and assigned cluster by color
-update.plot <- function(dat, centroid, clust){
-    k <- dim(centroid)[1]
-    m <- dim(dat)[1]
-    centroid$class <- "centroid"
-    dm <- rbind(centroid, dat)
-    clust <- c(1:k, clust)
-    size <- c(rep(2,k), rep(1,m))
-    plot(dm[,-5], col = clust, pch = 16, cex = size)
-}
-
-# assign each observation to a cluster based on distance to centroid
-cluster <- function(dat, centroid){
-    k <- dim(centroid)[1]
-    m <- dim(dat)[1]
-    dmat <- data.frame(matrix(rep(0, k*m),m,k)) #distance matrix
-    for(i in 1:m){
-        for(j in 1:k){
-            dmat[i,j] <- dist(dat[i,-5], centroid[j,])
-        }
-    }
-    clust <- as.factor(apply(dmat, 1, which.min))
-}
-
-# move centroid to center of mass of each cluster
-update.centroid <- function(dat, clust){
-    k <- nlevels(clust)
-    m <- dim(dat)[1]
-    centroid <- matrix(unlist(by(dat[,-5], clust, colMeans)), k, 4, byrow = TRUE)
-    centroid <- as.data.frame(centroid)
-    names(centroid) <- c("sepal.length",
-                         "sepal.width",
-                         "petal.length",
-                         "petal.width")
-    centroid
-}
-
-# calculate error
-class.accuracy <- function(f1, f2) {
-    library(e1071)
-    k <- nlevels(f1)
-    perm <- permutations(k)
-    ## determine how to evaluate all possible factor permutations and use min
-    acc <- 9e99
-    for(i in 1:dim(perm)[1]){
-        acc[i] <- sum(unclass(f1) == 
-                           unclass(factor(f2, levels = perm[i,])))/length(f1)
-    }
-    accout <- max(acc)
-    c(accout, perm[which.max(acc),])
-}
+```{r general functions}
+source("iris-functions.R")
 
 
 
 clust <- cluster(dat, centroid)
 
 print(data.frame(Iteration = 1, 
-                 Error = round(class.accuracy(dat$class, clust)[1], 4)))
-update.plot(dat, centroid, clust)
+                 Accuracy = round(class.accuracy(dat$class, clust)[1], 4)))
+# update.plot(dat, centroid, clust)
 
 for(i in 2:10){
     centroid <- update.centroid(dat, clust)
     clust <- cluster(dat, centroid)
     print(data.frame(Iteration = i, 
                      Accuracy = round(class.accuracy(dat$class, clust)[1], 4)))
-    update.plot(dat, centroid, clust)
+#     update.plot(dat, centroid, clust)
 }
 ```
 
+# Appendix: code for functions used
+
+```{r child="iris-functions.R"}
+```
