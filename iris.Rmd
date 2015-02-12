@@ -19,7 +19,7 @@ names(dat) <- c("sepal.length",
                 "class")
 
 library(RColorBrewer)
-palette(brewer.pal(6, "Set2"))
+palette(c(brewer.pal(3, "Set2"), "#E41A1C", "#4DAF4A"))
 ```
 
 First, let's take a look at the structure of the data. The set contains 150 observations of measurements on 4 different aspects of iris flowers and they are classified as one of 3 different species of iris. There are 50 observations of each species. An example observation of each species from the dataset is shown below.
@@ -96,24 +96,76 @@ for(i in 1:3){
     }
 ```
 
+```{r tf plot, echo=FALSE}
+dclass <- dat$class
+levels(dclass) <- c(1,2,3)
 
-```{r}
+levels(clust) <- class.accuracy(dat$class, clust)[2:4]
+
+tf <- dclass == clust
+
+plot(dat$petal.length, dat$petal.width, col = 5-tf, pch = 16,
+     xlab = "Petal Length", ylab = "Petal Width")
+legend("bottomright", c("Correctly classified", "Incorrectly classified"),
+       pch = 16, col = palette()[5:4])
+paste0("Classification accuracy = ",
+       round(100*class.accuracy(dat$class, clust)[1],1),"%")
+```
+
+
+
+```{r accuracy, echo=FALSE}
+set.seed(18)
+centroid <- dat[sample(1:m, k),-5]
 clust <- cluster(dat, centroid)
 
-print(data.frame(Iteration = 1, 
-                 Accuracy = round(class.accuracy(dat$class, clust)[1], 4)))
-# update.plot(dat, centroid, clust)
-
+acc <- c(1, class.accuracy(dat$class, clust)[1])
 for(i in 2:10){
     centroid <- update.centroid(dat, clust)
     clust <- cluster(dat, centroid)
-    print(data.frame(Iteration = i, 
-                     Accuracy = round(class.accuracy(dat$class, clust)[1], 4)))
-#     update.plot(dat, centroid, clust)
+    acc <- rbind(acc, c(i, class.accuracy(dat$class, clust)[1]))
 }
+
+plot(acc, type = "b",
+     xlab="Number of loop iterations", ylab="Classification accuracy")
 ```
+
+```{r calc iterations, echo=FALSE, eval=FALSE}
+
+store <- c(0,0)
+for(i in 1:10){
+    print(i)
+    centroid <- dat[sample(1:m, k),-5]
+    clust <- cluster(dat, centroid)
+    acc <- 0
+    for(j in 1:10){
+        
+        acc <- c(acc,class.accuracy(dat$class, clust)[1])
+#         print(acc[j+1]); print(j)
+        if(abs(acc[j+1]-acc[j]) < 1/150) break
+        centroid <- update.centroid(dat, clust)
+        clust <- cluster(dat, centroid)
+        }
+    store <- rbind(store, c(j, acc[j+1]))
+    }
+store <- store[2:dim(store)[1],]
+save(store, file = "niter.RData")
+
+```
+
+```{r disp iterations, echo=FALSE}
+load("niter.RData")
+hist(store[,1])
+```
+
 
 # Appendix: code for functions used
 
 ```{r child="iris-functions.R"}
+```
+
+```{r echo=FALSE, results='asis'}
+# knit the first three lines of first.Rmd
+library(knitr)
+cat(knit_child(text = readLines('iris-functions.R')[1:3]), sep = '\n')
 ```
