@@ -7,6 +7,7 @@ output: html_document
 
 # Introduction
 
+http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data
 
 # Data Exploration
 
@@ -126,7 +127,7 @@ for(i in 2:10){
     acc <- rbind(acc, c(i, class.accuracy(dat$class, clust)[1]))
 }
 
-plot(acc, type = "b",
+plot(acc, type = "b", pch = 16, col = 1,
      xlab="Number of loop iterations", ylab="Classification accuracy")
 ```
 
@@ -150,19 +151,40 @@ for(i in 1:1000){
     store <- rbind(store, c(j, acc[j+1]))
     }
 store <- store[2:dim(store)[1],]
+store <- as.data.frame(store)
+names(store) <- c("iterations", "accuracy")
 save(store, file = "niter.RData")
 
 ```
 
 ```{r disp iterations, echo=FALSE}
 load("niter.RData")
+
+opar <- par(no.readonly = TRUE)
+par(mfrow = c(1,2))
+
+boxplot(store[,1], col = 2, ylab = "Number of Iterations for convergence",
+         main = "Histogram of number of iterations required for convergence
+         for 1000 randomly initialized sets of centroids")
+hist(store[,1], xlab = "Number of Iterations for convergence", col = 2,
+     main = "Histogram of number of iterations required for convergence
+     for 1000 randomly initialized sets of centroids")
+par(opar)
+
+hist(store[,2]*150, 150, xlab = "Number of correctly classified observations
+     (out of 150 in sample)", col = 3,
+     main = "Histogram of number of correctly classified observations 
+     for 1000 randomly initialized sets of centroids")
+```
+
+```{r iterations summary}
 summary(store)
-hist(store[,1])
-hist(store[,2]*150, 150)
 ```
 
 
 # Appendix: code for functions used
+
+
 
 ```{r child="iris-functions.R"}
 ```
