@@ -161,14 +161,14 @@ save(store, file = "niter.RData")
 load("niter.RData")
 
 opar <- par(no.readonly = TRUE)
-par(mfrow = c(1,2))
-
-boxplot(store[,1], col = 2, ylab = "Number of Iterations for convergence",
-         main = "Histogram of number of iterations required for convergence
-         for 1000 randomly initialized sets of centroids")
+par(mfrow = c(2,1), mar = c(1.1,4.1,3.1,2.1))
+boxplot(store[,1], col = 2,
+         main = "Number of iterations required for convergence
+         for 1000 randomly initialized sets of centroids", horizontal = TRUE,
+        xaxt = "n", yaxt = "n")
+par(mar = c(5.1, 4.1, 1.1, 2.1))
 hist(store[,1], xlab = "Number of Iterations for convergence", col = 2,
-     main = "Histogram of number of iterations required for convergence
-     for 1000 randomly initialized sets of centroids")
+     main = "Histogram", mar = c(5.1,4.1,0.1,0.1))
 par(opar)
 
 hist(store[,2]*150, 150, xlab = "Number of correctly classified observations
