@@ -184,13 +184,15 @@ summary(store)
 
 # Appendix: code for functions used
 
+```{r create function child, echo=FALSE, warning=FALSE}
+# creates a new file wrapped as code chunk
+conread <- file("iris-functions.R")
+conwrite <- file("iris-functions-child.R")
 
-
-```{r child="iris-functions.R"}
+writeLines(c("```{r iris functions child, eval=FALSE}",
+             readLines(conread),
+             "```"), con = conwrite)
 ```
 
-```{r echo=FALSE, results='asis'}
-# knit the first three lines of first.Rmd
-library(knitr)
-cat(knit_child(text = readLines('iris-functions.R')[1:3]), sep = '\n')
+```{r child="iris-functions-child.R"}
 ```
