@@ -76,7 +76,6 @@ class.accuracy <- function(f1, f2) {
     library(e1071)
     k <- nlevels(f1)
     perm <- permutations(k)
-    ## determine how to evaluate all possible factor permutations and use min
     acc <- 9e99
     for(i in 1:dim(perm)[1]){
         acc[i] <- sum(unclass(f1) == 
